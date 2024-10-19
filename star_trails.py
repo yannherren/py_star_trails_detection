@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 
-IMAGE_PROCESS_SIZE = 1000
+IMAGE_PROCESS_WIDTH_PX = 1000
 NORMALIZED_BRIGHTNESS = 100
 
 def detect_trails(normalized_image):
@@ -23,8 +23,9 @@ def detect_trails(normalized_image):
                 continue
 
             angle = math.degrees(math.atan2(y2 - y1, x2 - x1))
+            line_length = math.hypot(x2 - x1, y2 - y1)
             angles.append(abs(angle))
-            line_lengths.append(math.hypot(x2 - x1, y2 - y1))
+            line_lengths.append(line_length)
 
     angles = [0] if len(angles) == 0 else angles
     line_lengths = [0] if len(line_lengths) == 0 else line_lengths
@@ -34,7 +35,7 @@ def detect_trails(normalized_image):
 def unify_image_size(image):
     img_height, img_width = image.shape[:2]
     aspect_ratio = img_height / img_width
-    resized_image = cv2.resize(image, (IMAGE_PROCESS_SIZE, int(IMAGE_PROCESS_SIZE * aspect_ratio)))
+    resized_image = cv2.resize(image, (IMAGE_PROCESS_WIDTH_PX, int(IMAGE_PROCESS_WIDTH_PX * aspect_ratio)))
 
     return resized_image
 
@@ -47,7 +48,7 @@ def normalize_brightness(image):
 
 def calculate_compensation(trail_length, trail_angle, original_image, focal_length_mm, sensor_width_mm, sensor_height_mm):
     width, height = original_image.shape[:2]
-    size_reduction_factor = width / IMAGE_PROCESS_SIZE
+    size_reduction_factor = width / IMAGE_PROCESS_WIDTH_PX
     x_length_px = math.cos(trail_angle) * trail_length * size_reduction_factor
     y_length_px = math.sin(trail_angle) * trail_length * size_reduction_factor
 
