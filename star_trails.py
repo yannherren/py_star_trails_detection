@@ -44,3 +44,23 @@ def normalize_brightness(image):
     normalized_image = cv2.convertScaleAbs(image, alpha=1, beta=delta)
 
     return normalized_image
+
+def calculate_compensation(trail_length, trail_angle, original_image, focal_length_mm, sensor_width_mm, sensor_height_mm):
+    width, height = original_image.shape[:2]
+    size_reduction_factor = width / IMAGE_PROCESS_SIZE
+    x_length_px = math.cos(trail_angle) * trail_length * size_reduction_factor
+    y_length_px = math.sin(trail_angle) * trail_length * size_reduction_factor
+
+    fov_h_rad = 2 * math.atan2(sensor_width_mm, 2 * focal_length_mm)
+    fov_v_rad = 2 * math.atan2(sensor_height_mm, 2 * focal_length_mm)
+
+    fov_h = math.degrees(fov_h_rad)
+    fov_v = math.degrees(fov_v_rad)
+
+    degree_per_px_h = fov_h / width
+    degree_per_px_v = fov_v / height
+
+    x_compensation_deg = x_length_px * degree_per_px_h
+    y_compensation_deg = y_length_px * degree_per_px_v
+
+    return x_compensation_deg, y_compensation_deg
